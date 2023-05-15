@@ -8,116 +8,32 @@
 {% block body %}
   <main>
     <div class="container">
-      {{ users }}
-      <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-header py-3">
-              <h4 class="my-0 fw-normal">Free</h4>
-            </div>
-            <div class="card-body">
-              <h1 class="card-title pricing-card-title">$0<small class="text-body-secondary fw-light">/mo</small></h1>
-              <ul class="list-unstyled mt-3 mb-4">
-                <li>10 users included</li>
-                <li>2 GB of storage</li>
-                <li>Email support</li>
-                <li>Help center access</li>
-              </ul>
-              <button type="button" class="w-100 btn btn-lg btn-outline-primary">Sign up for free</button>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm">
-            <div class="card-header py-3">
-              <h4 class="my-0 fw-normal">Pro</h4>
-            </div>
-            <div class="card-body">
-              <h1 class="card-title pricing-card-title">$15<small class="text-body-secondary fw-light">/mo</small></h1>
-              <ul class="list-unstyled mt-3 mb-4">
-                <li>20 users included</li>
-                <li>10 GB of storage</li>
-                <li>Priority email support</li>
-                <li>Help center access</li>
-              </ul>
-              <button type="button" class="w-100 btn btn-lg btn-primary">Get started</button>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card mb-4 rounded-3 shadow-sm border-primary">
-            <div class="card-header py-3 text-bg-primary border-primary">
-              <h4 class="my-0 fw-normal">Enterprise</h4>
-            </div>
-            <div class="card-body">
-              <h1 class="card-title pricing-card-title">$29<small class="text-body-secondary fw-light">/mo</small></h1>
-              <ul class="list-unstyled mt-3 mb-4">
-                <li>30 users included</li>
-                <li>15 GB of storage</li>
-                <li>Phone and email support</li>
-                <li>Help center access</li>
-              </ul>
-              <button type="button" class="w-100 btn btn-lg btn-primary">Contact us</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="display-6 text-center mb-4">Compare plans</h2>
-
-    <div class="table-responsive">
-      <table class="table text-center">
-        <thead>
-          <tr>
-            <th style="width: 34%;"></th>
-            <th style="width: 22%;">Free</th>
-            <th style="width: 22%;">Pro</th>
-            <th style="width: 22%;">Enterprise</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row" class="text-start">Public</th>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-          <tr>
-            <th scope="row" class="text-start">Private</th>
-            <td></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-        </tbody>
-
-        <tbody>
-          <tr>
-            <th scope="row" class="text-start">Permissions</th>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-          <tr>
-            <th scope="row" class="text-start">Sharing</th>
-            <td></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-          <tr>
-            <th scope="row" class="text-start">Unlimited members</th>
-            <td></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-          <tr>
-            <th scope="row" class="text-start">Extra security</th>
-            <td></td>
-            <td></td>
-            <td><svg class="bi" width="24" height="24"><use xlink:href="#check"></use></svg></td>
-          </tr>
-        </tbody>
-      </table>
+      {% if not users %}<h3>There are no records in the Database. Create users.</h3>{% else %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First Name</th>
+              <th scope="col">Last Name</th>
+              <th scope="col">Emails</th>
+              <th scope="col">Phone Numbers</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for el in users %}
+            <tr>
+              <th scope="row">{{ el.id }}</th>
+              <td>{{ el.firstName }}</td>
+              <td>{{ el.lastName }}</td>
+              <td>{{ el.emails }}</td>
+              <td>{{ el.phoneNumbers }}</td>
+              <td><button class="btn btn-link" type="submit">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ el.id }}'">Delete</button></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
     </div>
   </main>
 {% endblock %}

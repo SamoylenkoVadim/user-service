@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
-
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -14,13 +14,16 @@ class User(db.Model):
     emails = db.Column(db.String(100), nullable=False)
     phoneNumbers = db.Column(db.String(30), nullable=False)
 
+
 with app.app_context():
     db.create_all()
+
 
 @app.route("/")
 def index():
     users = User.query.all()
     return render_template('index.html', users=users)
+
 
 @app.route("/create", methods=['GET', 'POST'])
 def create():
@@ -43,6 +46,18 @@ def create():
             return '500 Internal Server Error'
     else:
         return render_template('create.html')
+
+
+@app.route("/delete/<id>")
+def delete(id):
+    try:
+        user = User.query.get(id)
+        db.session.delete(user)
+        db.session.commit()
+    except:
+        return '500 Internal Server Error'
+    return redirect("/")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
