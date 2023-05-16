@@ -8,7 +8,7 @@
 {% block body %}
   <main>
     <div class="container">
-      {% if not users %}<h3>There are no records in the Database. Create users.</h3>{% else %}
+      {% if not users_data %}<h3>There are no records in the Database. Create users.</h3>{% else %}
         <table class="table">
           <thead>
             <tr>
@@ -21,22 +21,22 @@
             </tr>
           </thead>
           <tbody>
-          {% for user_data in users %}
+          {% for user in users_data %}
             <tr>
-              <th scope="row">{{ user_data.user.id }}</th>
-              <td>{{ user_data.user.firstName }}</td>
-              <td>{{ user_data.user.lastName }}</td>
+              <th scope="row">{{ loop.index }}</th>
+              <td>{{ user.firstName }}</td>
+              <td>{{ user.lastName }}</td>
               <td>
-                {% for email in user_data.emails %}
-                  {{ email.mail }}<br/>
+                {% for email in user.emails %}
+                  {{ email }}<br/>
                 {% endfor %}
               </td>
               <td>
-                {% for phone_number in user_data.phone_numbers %}
-                  {{ phone_number.number }}<br/>
+                {% for phone_number in user.phone_numbers %}
+                  {{ phone_number }}<br/>
                 {% endfor %}
               </td>
-              <td><button class="btn btn-link" onclick="location.href='/edit/{{ user_data.user.id }}'">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ user_data.user.id }}'">Delete</button></td>
+              <td><button class="btn btn-link" onclick="location.href='/edit/{{ user.id }}'">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ user.id }}'">Delete</button></td>
             </tr>
           {% endfor %}
           </tbody>
