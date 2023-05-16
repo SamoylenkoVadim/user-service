@@ -37,6 +37,22 @@ class PhoneNumber(db.Model):
 with app.app_context():
     db.create_all()
 
+is_api_request = False
+
+
+@app.before_request
+def before_request():
+    global is_api_request
+    is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
+
+
+@app.errorhandler(Exception)
+def all_exception_handler(error):
+    if is_api_request:
+        return jsonify(status=f'Internal Server Error: {error}'), 500
+    else:
+        return f'Internal Server Error: {error}', 500
+
 
 @app.route("/")
 def index():
@@ -53,7 +69,7 @@ def index():
             'phone_numbers': [str(phone_number) for phone_number in phone_numbers],
         })
 
-    if request.headers.get("Accept") == "application/json":
+    if is_api_request:
         return jsonify(users_data=users_data)
 
     return render_template('index.html', users_data=users_data)
@@ -61,8 +77,6 @@ def index():
 
 @app.route("/create", methods=['GET', 'POST'])
 def create():
-    is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
-
     if request.method == "GET":
         if is_api_request:
             return jsonify(status="Method Not Allowed"), 405
@@ -88,48 +102,34 @@ def create():
             else:
                 return 'Bad request: firstName and lastName are required', 400
 
-        try:
-            user = User(firstName=firstName, lastName=lastName)
-            if mail:
-                email = Email(mail=mail)
-                user.emails.extend([email])
+        user = User(firstName=firstName, lastName=lastName)
+        if mail:
+            email = Email(mail=mail)
+            user.emails.extend([email])
 
-            if number:
-                phone_number = PhoneNumber(number=number)
-                user.phoneNumbers.extend([phone_number])
+        if number:
+            phone_number = PhoneNumber(number=number)
+            user.phoneNumbers.extend([phone_number])
 
-            db.session.add(user)
-            db.session.commit()
+        db.session.add(user)
+        db.session.commit()
 
-            if is_api_request:
-                return jsonify(status="Created"), 201
-            else:
-                return redirect("/")
-
-        except Exception as e:
-            if is_api_request:
-                return jsonify(status=f'Internal Server Error: {e}'), 500
-            else:
-                return f'Internal Server Error: {e}', 500
+        if is_api_request:
+            return jsonify(status="Created"), 201
+        else:
+            return redirect("/")
 
 
 @app.route("/delete/<user_id>", methods=["GET", "DELETE"])
 def delete(user_id):
-    is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
-    try:
-        user = db.session.get(User, user_id)
-        if user is None:
-            if is_api_request:
-                return jsonify(status='Not Found'), 404
-            else:
-                return 'Not Found', 404
-        db.session.delete(user)
-        db.session.commit()
-    except Exception as e:
+    user = db.session.get(User, user_id)
+    if user is None:
         if is_api_request:
-            return jsonify(status=f'Internal Server Error: {e}'), 500
+            return jsonify(status='Not Found'), 404
         else:
-            return f'Internal Server Error: {e}', 500
+            return 'Not Found', 404
+    db.session.delete(user)
+    db.session.commit()
 
     if is_api_request:
         return jsonify(status='Record deleted successfully'), 204
@@ -139,9 +139,7 @@ def delete(user_id):
 
 @app.route("/edit/<user_id>", methods=["GET", "POST"])
 def edit(user_id):
-    is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
     user = db.session.get(User, user_id)
-
     if user is None:
         if is_api_request:
             return jsonify(status='Not Found'), 404
@@ -157,75 +155,65 @@ def edit(user_id):
         else:
             return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
 
-
     if request.method == "POST":
-        try:
-            if is_api_request:
-                data = request.json
-                if "firstName" in data:
-                    user.firstName = data.get("firstName").strip()
-                if "lastName" in data:
-                    user.lastName = data.get("lastName").strip()
-                if "emails" in data:
-                    db.session.query(Email).filter_by(user_id=user_id).delete()
-                    for email in emails:
-                        db.session.expunge(email)
-                    for email in data.get("emails"):
-                        email = Email(mail=email.strip())
-                        user.emails.extend([email])
-                if "phone_numbers" in data:
-                    db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
-                    for phone_number in phone_numbers:
-                        db.session.expunge(phone_number)
-                    for phone_number in data.get("phone_numbers"):
-                        number = PhoneNumber(number=phone_number.strip())
-                        user.phoneNumbers.extend([number])
-            else:
+        if is_api_request:
+            data = request.json
+            if "firstName" in data:
+                user.firstName = data.get("firstName").strip()
+            if "lastName" in data:
+                user.lastName = data.get("lastName").strip()
+            if "emails" in data:
+                db.session.query(Email).filter_by(user_id=user_id).delete()
+                for email in emails:
+                    db.session.expunge(email)
+                for email in data.get("emails"):
+                    email = Email(mail=email.strip())
+                    user.emails.extend([email])
+            if "phone_numbers" in data:
+                db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
+                for phone_number in phone_numbers:
+                    db.session.expunge(phone_number)
+                for phone_number in data.get("phone_numbers"):
+                    number = PhoneNumber(number=phone_number.strip())
+                    user.phoneNumbers.extend([number])
+        else:
 
-                save_user_name_button = request.form.get("SaveUserName")
-                save_user_emails_button = request.form.get("SaveUserEmails")
-                save_user_phone_numbers_button = request.form.get("SaveUserPhoneNumbers")
+            save_user_name_button = request.form.get("SaveUserName")
+            save_user_emails_button = request.form.get("SaveUserEmails")
+            save_user_phone_numbers_button = request.form.get("SaveUserPhoneNumbers")
 
-                if save_user_name_button is not None:
-                    user.firstName = request.form["firstName"].strip()
-                    user.lastName = request.form["lastName"].strip()
+            if save_user_name_button is not None:
+                user.firstName = request.form["firstName"].strip()
+                user.lastName = request.form["lastName"].strip()
 
-                if save_user_emails_button is not None:
-                    db.session.query(Email).filter_by(user_id=user_id).delete()
-                    for email in emails:
-                        db.session.expunge(email)
+            if save_user_emails_button is not None:
+                db.session.query(Email).filter_by(user_id=user_id).delete()
+                for email in emails:
+                    db.session.expunge(email)
 
-                    for key, value in request.form.items():
-                        if key.startswith('email_') or key.startswith('newEmail'):
-                            if value.strip() != "":
-                                email = Email(mail=value.strip())
-                                user.emails.extend([email])
+                for key, value in request.form.items():
+                    if key.startswith('email_') or key.startswith('newEmail'):
+                        if value.strip() != "":
+                            email = Email(mail=value.strip())
+                            user.emails.extend([email])
 
-                if save_user_phone_numbers_button is not None:
-                    db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
+            if save_user_phone_numbers_button is not None:
+                db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
 
-                    for phone_number in phone_numbers:
-                        db.session.expunge(phone_number)
+                for phone_number in phone_numbers:
+                    db.session.expunge(phone_number)
 
-                    for key, value in request.form.items():
-                        if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
-                            if value.strip() != "":
-                                number = PhoneNumber(number=value.strip())
-                                user.phoneNumbers.extend([number])
+                for key, value in request.form.items():
+                    if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
+                        if value.strip() != "":
+                            number = PhoneNumber(number=value.strip())
+                            user.phoneNumbers.extend([number])
+        db.session.commit()
 
-            db.session.commit()
-
-            if is_api_request:
-                return jsonify(status="Changes committed"), 200
-            else:
-                return redirect(request.url)
-
-        except Exception as e:
-            if is_api_request:
-                return jsonify(status=f'Internal Server Error: {e}'), 500
-            else:
-                return f'Internal Server Error: {e}', 500
-
+        if is_api_request:
+            return jsonify(status="Changes committed"), 200
+        else:
+            return redirect(request.url)
 
 
 if __name__ == "__main__":
