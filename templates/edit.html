@@ -17,6 +17,7 @@
 
   <h3>Edit user emails</h3>
   <form method="post">
+    {% set emails = user.emails.split(',') %}
     {% for email in emails %}
       <input type="text" class="form-control" name="email_{{ loop.index }}" id="email_{{ loop.index }}" placeholder="Email" value="{{ email }}"><br>
     {% endfor %}
@@ -28,8 +29,11 @@
 
   <h3>Edit user phone numbers</h3>
   <form method="post">
-    <input type="text" class="form-control" name="phoneNumbers" id="phoneNumbers" placeholder="Phone Numbers" value="{{ user.phoneNumbers }}"><br>
-    <input type="text" class="form-control" name="newPhoneNumbers" id="newPhoneNumbers" placeholder="Add a new phone number"><br>
+    {% set phoneNumbers = user.phoneNumbers.split(',') %}
+    {% for phoneNumber in phoneNumbers %}
+      <input type="text" class="form-control" name="phoneNumber_{{ loop.index }}" id="phoneNumber_{{ loop.index }}" placeholder="Phone Number" value="{{ phoneNumber }}"><br>
+    {% endfor %}
+    <input type="text" class="form-control" name="newPhoneNumber" id="newPhoneNumber" placeholder="Add a new phone number"><br>
     <button class="btn btn-success" name="SaveUserPhoneNumbers" type="submit">Save</button>
   </form>
 </div>

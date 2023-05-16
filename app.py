@@ -27,10 +27,10 @@ def index():
 def create():
     if request.method == "POST":
         try:
-            firstName = request.form["firstName"]
-            lastName = request.form["lastName"]
-            emails = request.form["emails"]
-            phoneNumbers = request.form["phoneNumbers"]
+            firstName = request.form["firstName"].strip()
+            lastName = request.form["lastName"].strip()
+            emails = request.form["emails"].strip()
+            phoneNumbers = request.form["phoneNumbers"].strip()
         except:
             return '400 Bad request'
 
@@ -59,29 +59,36 @@ def delete(id):
 @app.route("/edit/<id>", methods=["GET", "PUT", "POST"])
 def edit(id):
     user = User.query.get(id)
-    emails = user.emails.split(',')
     if request.method in ("POST", "PUT"):
         SaveUserName = request.form.get("SaveUserName")
         SaveUserEmails = request.form.get("SaveUserEmails")
         SaveUserPhoneNumbers = request.form.get("SaveUserPhoneNumbers")
 
         if SaveUserName is not None:
-            user.firstName = request.form["firstName"]
-            user.lastName = request.form["lastName"]
+            user.firstName = request.form["firstName"].strip()
+            user.lastName = request.form["lastName"].strip()
 
         if SaveUserEmails is not None:
             emails = []
             for key, value in request.form.items():
                 if key.startswith('email_') or key.startswith('newEmail'):
                     if value.strip() != "":
-                        emails.append(value)
+                        emails.append(value.strip())
             user.emails = ','.join(emails)
 
+        if SaveUserPhoneNumbers is not None:
+            phoneNumbers = []
+            for key, value in request.form.items():
+                if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
+                    if value.strip() != "":
+                        phoneNumbers.append(value.strip())
+            user.phoneNumbers = ','.join(phoneNumbers)
+
         db.session.commit()
-        return render_template('edit.html', user=user, emails=emails)
+        return render_template('edit.html', user=user)
 
     else:
-        return render_template('edit.html', user=user, emails=emails)
+        return render_template('edit.html', user=user)
 
 if __name__ == "__main__":
     app.run(debug=True)
