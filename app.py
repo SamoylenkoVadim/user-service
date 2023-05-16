@@ -14,8 +14,10 @@ class User(db.Model):
     emails = db.Column(db.String(100), nullable=False)
     phoneNumbers = db.Column(db.String(100), nullable=False)
 
+
 with app.app_context():
     db.create_all()
+
 
 @app.route("/")
 def index():
@@ -56,36 +58,40 @@ def delete(id):
         return '500 Internal Server Error'
     return redirect("/")
 
+
 @app.route("/edit/<id>", methods=["GET", "PUT", "POST"])
 def edit(id):
     user = User.query.get(id)
     if request.method in ("POST", "PUT"):
-        SaveUserName = request.form.get("SaveUserName")
-        SaveUserEmails = request.form.get("SaveUserEmails")
-        SaveUserPhoneNumbers = request.form.get("SaveUserPhoneNumbers")
+        try:
+            SaveUserName = request.form.get("SaveUserName")
+            SaveUserEmails = request.form.get("SaveUserEmails")
+            SaveUserPhoneNumbers = request.form.get("SaveUserPhoneNumbers")
 
-        if SaveUserName is not None:
-            user.firstName = request.form["firstName"].strip()
-            user.lastName = request.form["lastName"].strip()
+            if SaveUserName is not None:
+                user.firstName = request.form["firstName"].strip()
+                user.lastName = request.form["lastName"].strip()
 
-        if SaveUserEmails is not None:
-            emails = []
-            for key, value in request.form.items():
-                if key.startswith('email_') or key.startswith('newEmail'):
-                    if value.strip() != "":
-                        emails.append(value.strip())
-            user.emails = ','.join(emails)
+            if SaveUserEmails is not None:
+                emails = []
+                for key, value in request.form.items():
+                    if key.startswith('email_') or key.startswith('newEmail'):
+                        if value.strip() != "":
+                            emails.append(value.strip())
+                user.emails = ','.join(emails)
 
-        if SaveUserPhoneNumbers is not None:
-            phoneNumbers = []
-            for key, value in request.form.items():
-                if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
-                    if value.strip() != "":
-                        phoneNumbers.append(value.strip())
-            user.phoneNumbers = ','.join(phoneNumbers)
+            if SaveUserPhoneNumbers is not None:
+                phoneNumbers = []
+                for key, value in request.form.items():
+                    if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
+                        if value.strip() != "":
+                            phoneNumbers.append(value.strip())
+                user.phoneNumbers = ','.join(phoneNumbers)
 
-        db.session.commit()
-        return render_template('edit.html', user=user)
+            db.session.commit()
+            return render_template('edit.html', user=user)
+        except:
+            return '500 Internal Server Error'
 
     else:
         return render_template('edit.html', user=user)

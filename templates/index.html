@@ -21,14 +21,24 @@
             </tr>
           </thead>
           <tbody>
-          {% for el in users %}
+          {% for user in users %}
             <tr>
-              <th scope="row">{{ el.id }}</th>
-              <td>{{ el.firstName }}</td>
-              <td>{{ el.lastName }}</td>
-              <td>{{ el.emails }}</td>
-              <td>{{ el.phoneNumbers }}</td>
-              <td><button class="btn btn-link" onclick="location.href='/edit/{{ el.id }}'">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ el.id }}'">Delete</button></td>
+              <th scope="row">{{ user.id }}</th>
+              <td>{{ user.firstName }}</td>
+              <td>{{ user.lastName }}</td>
+              <td>
+                {% set emails = user.emails.split(',') %}
+                {% for email in emails %}
+                  {{email}}<br/>
+                {% endfor %}
+              </td>
+              <td>
+                {% set phoneNumbers = user.phoneNumbers.split(',') %}
+                {% for phoneNumber in phoneNumbers %}
+                  {{phoneNumber}}<br/>
+                {% endfor %}
+              </td>
+              <td><button class="btn btn-link" onclick="location.href='/edit/{{ user.id }}'">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ user.id }}'">Delete</button></td>
             </tr>
           {% endfor %}
           </tbody>
