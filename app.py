@@ -11,20 +11,20 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lastName = db.Column(db.String(100), nullable=False)
     firstName = db.Column(db.String(100), nullable=False)
-    emails = db.relationship('Emails', backref='user', lazy=True)
-    phoneNumbers = db.relationship('PhoneNumbers', backref='user', lazy=True)
+    emails = db.relationship('Email', backref='user', lazy=True, cascade="all, delete-orphan")
+    phoneNumbers = db.relationship('PhoneNumber', backref='user', lazy=True, cascade="all, delete-orphan")
 
 
-class Emails(db.Model):
+class Email(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), nullable=False)
-    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mail = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
 
-class PhoneNumbers(db.Model):
+class PhoneNumber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    phoneNumbers = db.Column(db.String(100), nullable=False)
-    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    number = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
 
 with app.app_context():
@@ -33,7 +33,20 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    users = db.session.query(User, Emails.email, PhoneNumbers.phoneNumbers).join(Emails).join(PhoneNumbers).all()
+    users_data = db.session.query(User, Email, PhoneNumber).join(Email).join(PhoneNumber).all()
+
+    users = []
+    for user_data in users_data:
+        user = user_data[0]
+        email = user_data[1]
+        phone_number = user_data[2]
+
+        users.append({
+            'user': user,
+            'emails': [email],
+            'phone_numbers': [phone_number]
+        })
+
     return render_template('index.html', users=users)
 
 
@@ -43,31 +56,25 @@ def create():
         try:
             firstName = request.form["firstName"].strip()
             lastName = request.form["lastName"].strip()
-            emails = request.form["emails"].strip()
-            phoneNumbers = request.form["phoneNumbers"].strip()
-        except:
-            return 'Bad request', 400
+            mail = request.form["mail"].strip()
+            number = request.form["number"].strip()
+        except Exception as e:
+            return f'Bad request: {e}', 400
 
         try:
-            user = User()
-            user.firstName = firstName
-            user.lastName = lastName
+            user = User(firstName=firstName, lastName=lastName)
+            email = Email(mail=mail)
+            phone_number = PhoneNumber(number=number)
 
-            email = Emails()
-            email.email = emails
-
-            phone_number = PhoneNumbers()
-            phone_number.phoneNumbers = phoneNumbers
-
-            user.emails.append(email)
-            user.phoneNumbers.append(phone_number)
+            user.emails.extend([email])
+            user.phoneNumbers.extend([phone_number])
 
             db.session.add(user)
             db.session.commit()
 
             return redirect("/")
-        except:
-            return 'Internal Server Error', 500
+        except Exception as e:
+            return f'Internal Server Error: {e}', 500
     else:
         return render_template('create.html')
 
@@ -77,8 +84,6 @@ def delete(user_id):
     try:
         user = db.session.get(User, user_id)
         if user:
-            Emails.query.filter_by(userId=user.id).delete()
-            PhoneNumbers.query.filter_by(userId=user.id).delete()
             db.session.delete(user)
             db.session.commit()
     except Exception as e:
@@ -119,7 +124,6 @@ def edit(user_id):
             return render_template('edit.html', user=user)
         except:
             return 'Internal Server Error', 500
-
     else:
         return render_template('edit.html', user=user)
 
