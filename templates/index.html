@@ -28,7 +28,7 @@
               <td>{{ el.lastName }}</td>
               <td>{{ el.emails }}</td>
               <td>{{ el.phoneNumbers }}</td>
-              <td><button class="btn btn-link" type="submit">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ el.id }}'">Delete</button></td>
+              <td><button class="btn btn-link" onclick="location.href='/edit/{{ el.id }}'">Edit</button> <button class="btn btn-link" onclick="location.href='/delete/{{ el.id }}'">Delete</button></td>
             </tr>
           {% endfor %}
           </tbody>

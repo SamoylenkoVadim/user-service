@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>User Service</title>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <h3>Edit user name</h3>
+  <form method="post">
+    <input type="text" class="form-control" name="firstName" id="firstName" placeholder="First Name" value="{{ user.firstName }}"><br>
+    <input type="text" class="form-control" name="lastName" id="lastName" placeholder="Last Name" value="{{ user.lastName }}"><br>
+    <button class="btn btn-success" name="SaveUserName" type="submit">Save</button>
+  </form>
+
+  <br><br>
+
+  <h3>Edit user emails</h3>
+  <form method="post">
+    {% for email in emails %}
+      <input type="text" class="form-control" name="email_{{ loop.index }}" id="email_{{ loop.index }}" placeholder="Email" value="{{ email }}"><br>
+    {% endfor %}
+    <input type="text" class="form-control" name="newEmail" id="newEmail" placeholder="Add a new email"><br>
+    <button class="btn btn-success" name="SaveUserEmails" type="submit">Save</button>
+  </form>
+
+  <br><br>
+
+  <h3>Edit user phone numbers</h3>
+  <form method="post">
+    <input type="text" class="form-control" name="phoneNumbers" id="phoneNumbers" placeholder="Phone Numbers" value="{{ user.phoneNumbers }}"><br>
+    <input type="text" class="form-control" name="newPhoneNumbers" id="newPhoneNumbers" placeholder="Add a new phone number"><br>
+    <button class="btn btn-success" name="SaveUserPhoneNumbers" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}
