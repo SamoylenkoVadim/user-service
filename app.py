@@ -33,21 +33,18 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    users_data = db.session.query(User, Email, PhoneNumber).join(Email).join(PhoneNumber).all()
-
-    users = []
-    for user_data in users_data:
-        user = user_data[0]
-        email = user_data[1]
-        phone_number = user_data[2]
-
-        users.append({
+    users = db.session.query(User).all()
+    users_data = []
+    for user in users:
+        emails = db.session.query(Email).filter_by(user_id=user.id).all()
+        phone_numbers = db.session.query(PhoneNumber).filter_by(user_id=user.id).all()
+        users_data.append({
             'user': user,
-            'emails': [email],
-            'phone_numbers': [phone_number]
+            'emails': emails,
+            'phone_numbers': phone_numbers
         })
 
-    return render_template('index.html', users=users)
+    return render_template('index.html', users=users_data)
 
 
 @app.route("/create", methods=['GET', 'POST'])
@@ -94,6 +91,12 @@ def delete(user_id):
 @app.route("/edit/<user_id>", methods=["GET", "PUT", "POST"])
 def edit(user_id):
     user = db.session.get(User, user_id)
+    if user is None:
+        return f'Not Found', 404
+
+    emails = db.session.query(Email).filter_by(user_id=user_id).all()
+    phone_numbers = db.session.query(PhoneNumber).filter_by(user_id=user_id).all()
+
     if request.method in ("POST", "PUT"):
         try:
             SaveUserName = request.form.get("SaveUserName")
@@ -105,27 +108,27 @@ def edit(user_id):
                 user.lastName = request.form["lastName"].strip()
 
             if SaveUserEmails is not None:
-                emails = []
+                db.session.query(Email).filter_by(user_id=user_id).delete()
                 for key, value in request.form.items():
                     if key.startswith('email_') or key.startswith('newEmail'):
                         if value.strip() != "":
-                            emails.append(value.strip())
-                user.emails = ','.join(emails)
+                            email = Email(mail=value.strip())
+                            user.emails.extend([email])
 
             if SaveUserPhoneNumbers is not None:
-                phoneNumbers = []
+                db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
                 for key, value in request.form.items():
                     if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
                         if value.strip() != "":
-                            phoneNumbers.append(value.strip())
-                user.phoneNumbers = ','.join(phoneNumbers)
+                            number = PhoneNumber(number=value.strip())
+                            user.phoneNumbers.extend([number])
 
             db.session.commit()
-            return render_template('edit.html', user=user)
-        except:
-            return 'Internal Server Error', 500
+            return redirect(request.url)
+        except Exception as e:
+            return f'Internal Server Error: {e}', 500
     else:
-        return render_template('edit.html', user=user)
+        return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
 
 
 if __name__ == "__main__":
