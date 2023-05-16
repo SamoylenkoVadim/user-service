@@ -22,7 +22,7 @@ class Email(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
     def __repr__(self):
-        return self.mail
+        return str(self.mail)
 
 
 class PhoneNumber(db.Model):
@@ -31,7 +31,7 @@ class PhoneNumber(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
     def __repr__(self):
-        return self.number
+        return str(self.number)
 
 
 with app.app_context():
@@ -118,9 +118,13 @@ def delete(user_id):
     is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
     try:
         user = db.session.get(User, user_id)
-        if user:
-            db.session.delete(user)
-            db.session.commit()
+        if user is None:
+            if is_api_request:
+                return jsonify(status='Not Found'), 404
+            else:
+                return 'Not Found', 404
+        db.session.delete(user)
+        db.session.commit()
     except Exception as e:
         if is_api_request:
             return jsonify(status=f'Internal Server Error: {e}'), 500
@@ -133,56 +137,96 @@ def delete(user_id):
         return redirect("/")
 
 
-@app.route("/edit/<user_id>", methods=["GET", "PUT", "POST"])
+@app.route("/edit/<user_id>", methods=["GET", "POST"])
 def edit(user_id):
+    is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
     user = db.session.get(User, user_id)
+
     if user is None:
-        return f'Not Found', 404
+        if is_api_request:
+            return jsonify(status='Not Found'), 404
+        else:
+            return 'Not Found', 404
 
     emails = db.session.query(Email).filter_by(user_id=user_id).all()
     phone_numbers = db.session.query(PhoneNumber).filter_by(user_id=user_id).all()
 
-    if request.method in ("POST", "PUT"):
+    if request.method == "GET":
+        if is_api_request:
+            return jsonify(status="Method Not Allowed"), 405
+        else:
+            return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
+
+
+    if request.method == "POST":
         try:
-            SaveUserName = request.form.get("SaveUserName")
-            SaveUserEmails = request.form.get("SaveUserEmails")
-            SaveUserPhoneNumbers = request.form.get("SaveUserPhoneNumbers")
+            if is_api_request:
+                data = request.json
+                if "firstName" in data:
+                    user.firstName = data.get("firstName").strip()
+                if "lastName" in data:
+                    user.lastName = data.get("lastName").strip()
+                if "emails" in data:
+                    db.session.query(Email).filter_by(user_id=user_id).delete()
+                    for email in emails:
+                        db.session.expunge(email)
+                    for email in data.get("emails"):
+                        email = Email(mail=email.strip())
+                        user.emails.extend([email])
+                if "phone_numbers" in data:
+                    db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
+                    for phone_number in phone_numbers:
+                        db.session.expunge(phone_number)
+                    for phone_number in data.get("phone_numbers"):
+                        number = PhoneNumber(number=phone_number.strip())
+                        user.phoneNumbers.extend([number])
+            else:
 
-            if SaveUserName is not None:
-                user.firstName = request.form["firstName"].strip()
-                user.lastName = request.form["lastName"].strip()
+                save_user_name_button = request.form.get("SaveUserName")
+                save_user_emails_button = request.form.get("SaveUserEmails")
+                save_user_phone_numbers_button = request.form.get("SaveUserPhoneNumbers")
 
-            if SaveUserEmails is not None:
-                db.session.query(Email).filter_by(user_id=user_id).delete()
+                if save_user_name_button is not None:
+                    user.firstName = request.form["firstName"].strip()
+                    user.lastName = request.form["lastName"].strip()
 
-                for email in emails:
-                    db.session.expunge(email)
+                if save_user_emails_button is not None:
+                    db.session.query(Email).filter_by(user_id=user_id).delete()
+                    for email in emails:
+                        db.session.expunge(email)
 
-                for key, value in request.form.items():
-                    if key.startswith('email_') or key.startswith('newEmail'):
-                        if value.strip() != "":
-                            email = Email(mail=value.strip())
-                            user.emails.extend([email])
+                    for key, value in request.form.items():
+                        if key.startswith('email_') or key.startswith('newEmail'):
+                            if value.strip() != "":
+                                email = Email(mail=value.strip())
+                                user.emails.extend([email])
 
-            if SaveUserPhoneNumbers is not None:
-                db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
+                if save_user_phone_numbers_button is not None:
+                    db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
 
-                for phone_number in phone_numbers:
-                    db.session.expunge(phone_number)
+                    for phone_number in phone_numbers:
+                        db.session.expunge(phone_number)
 
-                for key, value in request.form.items():
-                    if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
-                        if value.strip() != "":
-                            number = PhoneNumber(number=value.strip())
-                            user.phoneNumbers.extend([number])
+                    for key, value in request.form.items():
+                        if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
+                            if value.strip() != "":
+                                number = PhoneNumber(number=value.strip())
+                                user.phoneNumbers.extend([number])
 
             db.session.commit()
-            return redirect(request.url)
+
+            if is_api_request:
+                return jsonify(status="Changes committed"), 200
+            else:
+                return redirect(request.url)
+
         except Exception as e:
-            return f'Internal Server Error: {e}', 500
-    else:
-        return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
+            if is_api_request:
+                return jsonify(status=f'Internal Server Error: {e}'), 500
+            else:
+                return f'Internal Server Error: {e}', 500
+
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5000)
