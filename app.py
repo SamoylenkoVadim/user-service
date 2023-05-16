@@ -72,20 +72,23 @@ def create():
         return render_template('create.html')
 
 
-@app.route("/delete/<id>", methods=["GET", "DELETE"])
-def delete(id):
+@app.route("/delete/<user_id>", methods=["GET", "DELETE"])
+def delete(user_id):
     try:
-        user = User.query.get(id)
-        db.session.delete(user)
-        db.session.commit()
-    except:
-        return 'Internal Server Error', 500
+        user = db.session.get(User, user_id)
+        if user:
+            Emails.query.filter_by(userId=user.id).delete()
+            PhoneNumbers.query.filter_by(userId=user.id).delete()
+            db.session.delete(user)
+            db.session.commit()
+    except Exception as e:
+        return f'Internal Server Error: {e}', 500
     return redirect("/")
 
 
-@app.route("/edit/<id>", methods=["GET", "PUT", "POST"])
-def edit(id):
-    user = User.query.get(id)
+@app.route("/edit/<user_id>", methods=["GET", "PUT", "POST"])
+def edit(user_id):
+    user = db.session.get(User, user_id)
     if request.method in ("POST", "PUT"):
         try:
             SaveUserName = request.form.get("SaveUserName")
@@ -119,6 +122,7 @@ def edit(id):
 
     else:
         return render_template('edit.html', user=user)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
