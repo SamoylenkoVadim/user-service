@@ -21,19 +21,19 @@
             </tr>
           </thead>
           <tbody>
-          {% for user in users %}
+          {% for user, emails, phoneNumbers in users %}
             <tr>
               <th scope="row">{{ user.id }}</th>
               <td>{{ user.firstName }}</td>
               <td>{{ user.lastName }}</td>
               <td>
-                {% set emails = user.emails.split(',') %}
+                {% set emails = emails.split(',') %}
                 {% for email in emails %}
                   {{email}}<br/>
                 {% endfor %}
               </td>
               <td>
-                {% set phoneNumbers = user.phoneNumbers.split(',') %}
+                {% set phoneNumbers = phoneNumbers.split(',') %}
                 {% for phoneNumber in phoneNumbers %}
                   {{phoneNumber}}<br/>
                 {% endfor %}

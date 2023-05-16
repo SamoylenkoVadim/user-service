@@ -11,8 +11,20 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lastName = db.Column(db.String(100), nullable=False)
     firstName = db.Column(db.String(100), nullable=False)
-    emails = db.Column(db.String(100), nullable=False)
+    emails = db.relationship('Emails', backref='user', lazy=True)
+    phoneNumbers = db.relationship('PhoneNumbers', backref='user', lazy=True)
+
+
+class Emails(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), nullable=False)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+class PhoneNumbers(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     phoneNumbers = db.Column(db.String(100), nullable=False)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 with app.app_context():
@@ -21,7 +33,7 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    users = User.query.all()
+    users = db.session.query(User, Emails.email, PhoneNumbers.phoneNumbers).join(Emails).join(PhoneNumbers).all()
     return render_template('index.html', users=users)
 
 
@@ -34,16 +46,28 @@ def create():
             emails = request.form["emails"].strip()
             phoneNumbers = request.form["phoneNumbers"].strip()
         except:
-            return '400 Bad request'
+            return 'Bad request', 400
 
         try:
-            user = User(firstName=firstName, lastName=lastName,
-                        emails=emails, phoneNumbers=phoneNumbers)
+            user = User()
+            user.firstName = firstName
+            user.lastName = lastName
+
+            email = Emails()
+            email.email = emails
+
+            phone_number = PhoneNumbers()
+            phone_number.phoneNumbers = phoneNumbers
+
+            user.emails.append(email)
+            user.phoneNumbers.append(phone_number)
+
             db.session.add(user)
             db.session.commit()
+
             return redirect("/")
         except:
-            return '500 Internal Server Error'
+            return 'Internal Server Error', 500
     else:
         return render_template('create.html')
 
@@ -55,7 +79,7 @@ def delete(id):
         db.session.delete(user)
         db.session.commit()
     except:
-        return '500 Internal Server Error'
+        return 'Internal Server Error', 500
     return redirect("/")
 
 
@@ -91,7 +115,7 @@ def edit(id):
             db.session.commit()
             return render_template('edit.html', user=user)
         except:
-            return '500 Internal Server Error'
+            return 'Internal Server Error', 500
 
     else:
         return render_template('edit.html', user=user)
