@@ -109,6 +109,10 @@ def edit(user_id):
 
             if SaveUserEmails is not None:
                 db.session.query(Email).filter_by(user_id=user_id).delete()
+
+                for email in emails:
+                    db.session.expunge(email)
+
                 for key, value in request.form.items():
                     if key.startswith('email_') or key.startswith('newEmail'):
                         if value.strip() != "":
@@ -117,6 +121,10 @@ def edit(user_id):
 
             if SaveUserPhoneNumbers is not None:
                 db.session.query(PhoneNumber).filter_by(user_id=user_id).delete()
+
+                for phone_number in phone_numbers:
+                    db.session.expunge(phone_number)
+
                 for key, value in request.form.items():
                     if key.startswith('phoneNumber_') or key.startswith('newPhoneNumber'):
                         if value.strip() != "":
