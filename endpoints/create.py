@@ -16,13 +16,13 @@ def create():
             data = request.json
             firstName = data.get("firstName", "").strip().title() or None
             lastName = data.get("lastName", "").strip().title() or None
-            mail = data.get("mail", "").strip().title() or None
-            number = data.get("number", "").strip().title() or None
+            mail = data.get("mail", "").strip() or None
+            number = data.get("number", "").strip() or None
         else:
             firstName = request.form.get("firstName", "").strip().title() or None
             lastName = request.form.get("lastName", "").strip().title() or None
-            mail = request.form.get("mail", "").strip().title() or None
-            number = request.form.get("number", "").strip().title() or None
+            mail = request.form.get("mail", "").strip() or None
+            number = request.form.get("number", "").strip() or None
 
         if firstName is None or lastName is None:
             if is_api_request(request):
