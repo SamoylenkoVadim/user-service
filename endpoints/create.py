@@ -9,10 +9,7 @@ create_bp = Blueprint('create', __name__)
 @validate_common({'firstName': str, 'lastName': str, 'mail': str, 'number': str})
 def create():
     if request.method == "GET":
-        if is_api_request(request):
-            return jsonify(status="Method Not Allowed"), 405
-        else:
-            return render_template('create.html')
+        return render_template('create.html')
 
     if request.method == "POST":
         if is_api_request(request):

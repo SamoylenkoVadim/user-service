@@ -30,10 +30,7 @@ def edit(user_id):
     phone_numbers = db.session.query(PhoneNumber).filter_by(user_id=user_id).all()
 
     if request.method == "GET":
-        if is_api_request(request):
-            return jsonify(status="Method Not Allowed"), 405
-        else:
-            return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
+        return render_template('edit.html', user=user, emails=emails, phone_numbers=phone_numbers)
 
     if request.method == "POST":
         if is_api_request(request):

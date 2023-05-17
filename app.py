@@ -1,9 +1,11 @@
-from flask import Flask, request
+import os
+from flask import Flask, request, send_from_directory
 from models import db
 from endpoints import index_bp, create_bp, delete_bp, edit_bp
 from flask import jsonify
 from flask_validation import Validator
 from utils import is_api_request
+from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
 Validator(app)
@@ -17,6 +19,22 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+SWAGGER_URL = "/docs"
+API_URL = "/docs/swagger.json"
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "User Service"
+    }
+)
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+
+@app.route("/docs/swagger.json")
+def specs():
+    return send_from_directory(os.getcwd(), "swagger.json")
 
 
 @app.errorhandler(400)

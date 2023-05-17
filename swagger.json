@@ -1,0 +1,428 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "User Service"
+    },
+    "paths": {
+        "/users": {
+            "parameters": [
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                }
+            ],
+            "get": {
+                "summary": "Get all users from Database",
+                "responses": {
+                    "200": {
+                        "description": "List of users in response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/users_data_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{user_id}": {
+            "parameters": [
+                {
+                    "name": "user_id",
+                    "description": "The unique identifier of the user",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                }
+            ],
+            "get": {
+                "summary": "Return user by id",
+                "responses": {
+                    "200": {
+                        "description": "Single users in response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/user_data_schema"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "404 User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/filter": {
+            "parameters": [
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                }
+            ],
+            "get": {
+                "summary": "Filter Users by Name",
+                "description": "Retrieve users based on first name and/or last name filters",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "firstName",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter users by first name"
+                    },
+                    {
+                        "in": "query",
+                        "name": "lastName",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter users by last name"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/users_data_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/delete/{user_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "user_id",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "description": "ID of the user to delete"
+                },
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                }
+            ],
+            "delete": {
+                "summary": "Delete User",
+                "description": "Delete a user by ID",
+                "responses": {
+                    "204": {
+                        "description": "User deleted successfully"
+                    },
+                    "404": {
+                        "description": "404 User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/create": {
+            "parameters": [
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                }
+            ],
+            "get": {
+                "summary": "Get Create User Form",
+                "description": "Retrieve the form to create a new user. No Json in the responce!!!",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create User",
+                "description": "Create a new user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string"
+                                    },
+                                    "lastName": {
+                                        "type": "string"
+                                    },
+                                    "mail": {
+                                        "type": "string"
+                                    },
+                                    "number": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "firstName",
+                                    "lastName",
+                                    "mail",
+                                    "number"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - firstName and lastName are required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/edit/{user_id}": {
+            "parameters": [
+                {
+                    "in": "header",
+                    "name": "Accept",
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            "application/json"
+                        ]
+                    },
+                    "required": true,
+                    "description": "The desired content type for the response"
+                },
+                {
+                    "in": "path",
+                    "name": "user_id",
+                    "required": true,
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "description": "ID of the user to edit"
+                }
+            ],
+            "get": {
+                "summary": "Get Edit User Form",
+                "description": "Retrieve the form to edit an existing user",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Edit User",
+                "description": "Edit an existing user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string"
+                                    },
+                                    "lastName": {
+                                        "type": "string"
+                                    },
+                                    "emails": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "phone_numbers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Changes committed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/status_schema"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "users_data_schema": {
+                "type": "object",
+                "properties": {
+                    "users_data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "$ref": "#/components/schemas/user_data_schema"
+                        }
+                    }
+                },
+                "required": [
+                    "users_data"
+                ]
+            },
+            "user_data_schema": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "emails": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "phone_numbers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "emails",
+                    "firstName",
+                    "id",
+                    "lastName",
+                    "phone_numbers"
+                ]
+            },
+            "status_schema": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            }
+        }
+    }
+}

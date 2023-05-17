@@ -15,12 +15,12 @@ def make_user_data(user, emails, phone_numbers):
     }
 
 
-@index_bp.route("/")
+@index_bp.route("/", methods=["GET"])
 def index():
     return redirect("/users")
 
 
-@index_bp.route("/users")
+@index_bp.route("/users", methods=["GET"])
 def users():
     users = db.session.query(User).all()
     users_data = []
