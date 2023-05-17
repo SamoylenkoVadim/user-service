@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify
+from flask_validation import validate_common, validate_with_jsonschema, Validator
+import utils
 
 app = Flask(__name__)
+Validator(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
@@ -46,6 +49,14 @@ def before_request():
     is_api_request = request.headers.get("Accept") == "application/json" or request.is_json
 
 
+@app.errorhandler(400)
+def handle_bad_request(e):
+    if is_api_request:
+        return jsonify(status=f'Error: {e}'), 400
+    else:
+        return f'Error: {e}', 400
+
+
 @app.errorhandler(Exception)
 def all_exception_handler(error):
     if is_api_request:
@@ -76,6 +87,7 @@ def index():
 
 
 @app.route("/create", methods=['GET', 'POST'])
+@validate_common({'firstName': str, 'lastName': str, 'mail': str, 'number': str})
 def create():
     if request.method == "GET":
         if is_api_request:
@@ -138,6 +150,7 @@ def delete(user_id):
 
 
 @app.route("/edit/<user_id>", methods=["GET", "POST"])
+@validate_with_jsonschema(utils.validation_schema)
 def edit(user_id):
     user = db.session.get(User, user_id)
     if user is None:
@@ -217,4 +230,4 @@ def edit(user_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
