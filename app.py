@@ -1,9 +1,6 @@
 from flask import Flask, request
 from models import db
-from endpoints.index import index_bp
-from endpoints.create import create_bp
-from endpoints.delete import delete_bp
-from endpoints.edit import edit_bp
+from endpoints import index_bp, create_bp, delete_bp, edit_bp
 from flask import jsonify
 from flask_validation import Validator
 from utils import is_api_request
