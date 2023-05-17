@@ -1,0 +1,9 @@
+version: "1"
+services:
+  app:
+    container_name: user-service
+    build: .
+    ports:
+      - "5050:5050"
+    volumes:
+      - .:/app
