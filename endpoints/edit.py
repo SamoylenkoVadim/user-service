@@ -1,8 +1,19 @@
 from models import User, Email, PhoneNumber, db
 from flask import request, jsonify, render_template, redirect, Blueprint
 from flask_validation import validate_with_jsonschema
-from utils import is_api_request, validation_schema
+from utils import is_api_request
 edit_bp = Blueprint('edit', __name__)
+
+validation_schema = {
+    "type": "object",
+    "properties": {
+        "firstName": {"type": "string", "nullable": True},
+        "lastName": {"type": "string", "nullable": True},
+        "emails": {"type": "array", "items": {"type": "string", "nullable": True}},
+        "phone_numbers": {"type": "array", "items": {"type": "string", "nullable": True}}
+    },
+    "required": []
+}
 
 
 @edit_bp.route("/edit/<user_id>", methods=["GET", "POST"])
