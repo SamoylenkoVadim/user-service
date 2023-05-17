@@ -172,9 +172,9 @@ def edit(user_id):
         if is_api_request:
             data = request.json
             if "firstName" in data:
-                user.firstName = data.get("firstName").strip()
+                user.firstName = data.get("firstName").strip() or user.firstName
             if "lastName" in data:
-                user.lastName = data.get("lastName").strip()
+                user.lastName = data.get("lastName").strip() or user.lastName
             if "emails" in data:
                 db.session.query(Email).filter_by(user_id=user_id).delete()
                 for email in emails:
@@ -196,8 +196,8 @@ def edit(user_id):
             save_user_phone_numbers_button = request.form.get("SaveUserPhoneNumbers")
 
             if save_user_name_button is not None:
-                user.firstName = request.form["firstName"].strip()
-                user.lastName = request.form["lastName"].strip()
+                user.firstName = request.form["firstName"].strip() or user.firstName
+                user.lastName = request.form["lastName"].strip() or user.lastName
 
             if save_user_emails_button is not None:
                 db.session.query(Email).filter_by(user_id=user_id).delete()
