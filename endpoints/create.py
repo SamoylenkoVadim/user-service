@@ -17,15 +17,15 @@ def create():
     if request.method == "POST":
         if is_api_request(request):
             data = request.json
-            firstName = data.get("firstName", "").strip().capitalize() or None
-            lastName = data.get("lastName", "").strip().capitalize() or None
-            mail = data.get("mail", "").strip().capitalize() or None
-            number = data.get("number", "").strip().capitalize() or None
+            firstName = data.get("firstName", "").strip().title() or None
+            lastName = data.get("lastName", "").strip().title() or None
+            mail = data.get("mail", "").strip().title() or None
+            number = data.get("number", "").strip().title() or None
         else:
-            firstName = request.form.get("firstName", "").strip().capitalize() or None
-            lastName = request.form.get("lastName", "").strip().capitalize() or None
-            mail = request.form.get("mail", "").strip().capitalize() or None
-            number = request.form.get("number", "").strip().capitalize() or None
+            firstName = request.form.get("firstName", "").strip().title() or None
+            lastName = request.form.get("lastName", "").strip().title() or None
+            mail = request.form.get("mail", "").strip().title() or None
+            number = request.form.get("number", "").strip().title() or None
 
         if firstName is None or lastName is None:
             if is_api_request(request):

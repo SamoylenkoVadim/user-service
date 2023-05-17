@@ -50,8 +50,8 @@ def search_by_id(user_id):
 
 @index_bp.route("/users/filter")
 def filtered_users_by_name():
-    firstName = request.args.get('firstName', default="", type=str).capitalize()
-    lastName = request.args.get('lastName', default="", type=str).capitalize()
+    firstName = request.args.get('firstName', default="", type=str).title()
+    lastName = request.args.get('lastName', default="", type=str).title()
 
     query = db.session.query(User)
     if firstName:
