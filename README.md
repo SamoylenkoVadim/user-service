@@ -71,14 +71,14 @@ python -m flask run --host=0.0.0.0 --port=5050
 #### Built-in documentation
 The app has endpoint to swagger documentation. Open the link in your browser when the application is running:
 ```
-http://127.0.0.1:5000/docs/
+http://127.0.0.1:5050/docs/
 ```
 
 #### Postman Documentation
 Swagger file is uploaded to Postman website. Here is the link to the documentation
 
  [Documentation on Postman website](https://www.postman.com/samoilenko26/workspace/user-service/api/5e6b562a-364a-4375-b8c3-c6c1d05df5c7)
-*Open a **Definition** tab
+*Open **User Service -> Definition** 
 
 #### Swagger Json
 For manual visualisation you can download swagger.json
@@ -88,9 +88,9 @@ For manual visualisation you can download swagger.json
 All endpoints are loaded to the Postman with all necessaries parameters. 
 
  [Documentation on Postman website](https://www.postman.com/samoilenko26/workspace/user-service/api/5e6b562a-364a-4375-b8c3-c6c1d05df5c7)
-*Open a **User Service** collection
+*Open a **User Service -> User Service** collection
 
-You can use the resource as examples of a requests. Or open it on the Desktop version of Postman and use it for testing without extra settings.
+You can use the resource as examples of requests. Or open it on the Desktop version of Postman and use it for testing without extra settings.
 
 ## Run unit/pytests
 
