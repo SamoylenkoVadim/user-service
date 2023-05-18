@@ -2,3 +2,4 @@ Flask==2.3.2
 flask_sqlalchemy==3.0.3
 flask_swagger_ui==4.11.1
 flask_validation==1.0.2
+pytest==7.3.1
