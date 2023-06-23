@@ -1,4 +1,10 @@
-## Challenge: User service
+## User service
+
+You can get access to the services by the link:  [User Service Online](http://13.48.42.153:5050/users) <br/>
+Feel free to create new users and edit them :)
+
+![User Interface](user_service_ui.png)
+
 The objective of this exercise is to implement a rest-service which is able to:
 
 - Create new user with contact data
@@ -25,17 +31,6 @@ PhoneNumber:
     id: <int>
     number: <string>
 ```
-
-#### Constraints
-- You provide straightforward documentation how to build and run the service
-- Submitted data is stored in database (free choice which one)
-- You can only use the following programming languages: Scala, Java, Python
-- If using Python, we strongly suggest not using the Django framework
-
-#### Bonus
-- You let your service run within a container based environment (Docker, Kubernetes)
-- You provide documentation of your services API endpoints
-- Your service is covered with tests
 
 ## Installation
 #### Docker
